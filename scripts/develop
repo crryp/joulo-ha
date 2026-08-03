@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+mkdir -p config
+
+# Home Assistant only discovers custom integrations under <config>/custom_components,
+# so link the repo's custom_components into the fake config directory.
+if [ ! -e config/custom_components ]; then
+  ln -s ../custom_components config/custom_components
+fi
+
+export PYTHONPATH="${PYTHONPATH:-}:$(pwd)"
+
+hass -c config --debug

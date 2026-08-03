@@ -1,0 +1,115 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Joulo",
+        "description": "Enter a personal API token generated from the Joulo dashboard under Settings → API.",
+        "data": {
+          "api_token": "API token"
+        }
+      },
+      "reconfigure": {
+        "title": "Update Joulo API token",
+        "description": "Enter a new personal API token generated from the Joulo dashboard under Settings → API.",
+        "data": {
+          "api_token": "API token"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid API token.",
+      "cannot_connect": "Could not connect to the Joulo API."
+    },
+    "abort": {
+      "already_configured": "This Joulo account is already configured.",
+      "reconfigure_successful": "The Joulo API token was updated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Joulo polling intervals",
+        "description": "Tune how often each Joulo endpoint is polled. Lower values give fresher data at the cost of more API calls.",
+        "data": {
+          "chargers_scan_interval": "Chargers poll interval",
+          "energy_scan_interval": "Energy poll interval",
+          "ere_position_scan_interval": "ERE position poll interval"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Status",
+        "state": {
+          "online": "Online",
+          "offline": "Offline",
+          "unknown": "Unknown"
+        }
+      },
+      "session_energy": {
+        "name": "Session energy"
+      },
+      "meter_reading": {
+        "name": "Meter reading"
+      },
+      "total_energy": {
+        "name": "Total energy"
+      },
+      "total_ere_credits": {
+        "name": "Total ERE credits"
+      },
+      "total_sessions": {
+        "name": "Total sessions"
+      },
+      "ere_paid": {
+        "name": "ERE paid out"
+      },
+      "ere_payable": {
+        "name": "ERE payable"
+      },
+      "ere_reserved": {
+        "name": "ERE reserved"
+      },
+      "ere_unsold_forecast": {
+        "name": "ERE unsold forecast (year to date)"
+      },
+      "ere_unsold_future_forecast": {
+        "name": "ERE unsold forecast (rest of year)"
+      },
+      "ere_ytd_expected": {
+        "name": "ERE expected revenue (year to date)"
+      },
+      "ere_total_expected": {
+        "name": "ERE expected revenue (full year)"
+      },
+      "ere_indicative_price": {
+        "name": "ERE indicative price"
+      },
+      "ere_realized_avg_price": {
+        "name": "ERE realized average price"
+      },
+      "ere_paid_price_per_ere": {
+        "name": "ERE paid average price"
+      },
+      "ere_fee_pct": {
+        "name": "ERE platform fee"
+      },
+      "ere_allocatable": {
+        "name": "ERE allocatable credits"
+      },
+      "ere_forecast_confidence": {
+        "name": "ERE forecast confidence"
+      },
+      "ere_forecast_history": {
+        "name": "ERE forecast history"
+      }
+    },
+    "binary_sensor": {
+      "is_charging": {
+        "name": "Charging"
+      }
+    }
+  }
+}

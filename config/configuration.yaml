@@ -1,0 +1,9 @@
+# Minimal "fake" Home Assistant used only to dev/test the Joulo integration.
+# custom_components/joulo is symlinked in here by scripts/develop.
+
+default_config:
+
+logger:
+  default: info
+  logs:
+    custom_components.joulo: debug

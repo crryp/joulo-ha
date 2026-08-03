@@ -1,0 +1,115 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Verbinden met Joulo",
+        "description": "Voer een persoonlijk API-token in, gegenereerd in het Joulo-dashboard onder Instellingen → API.",
+        "data": {
+          "api_token": "API-token"
+        }
+      },
+      "reconfigure": {
+        "title": "Joulo API-token bijwerken",
+        "description": "Voer een nieuw persoonlijk API-token in, gegenereerd in het Joulo-dashboard onder Instellingen → API.",
+        "data": {
+          "api_token": "API-token"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ongeldig API-token.",
+      "cannot_connect": "Kan geen verbinding maken met de Joulo API."
+    },
+    "abort": {
+      "already_configured": "Dit Joulo-account is al geconfigureerd.",
+      "reconfigure_successful": "Het Joulo API-token is bijgewerkt."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Joulo pollingintervallen",
+        "description": "Stel in hoe vaak elk Joulo-eindpunt wordt uitgelezen. Lagere waarden geven actuelere gegevens, maar zorgen voor meer API-aanroepen.",
+        "data": {
+          "chargers_scan_interval": "Pollinginterval laadpalen",
+          "energy_scan_interval": "Pollinginterval energie",
+          "ere_position_scan_interval": "Pollinginterval ERE-positie"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Status",
+        "state": {
+          "online": "Online",
+          "offline": "Offline",
+          "unknown": "Onbekend"
+        }
+      },
+      "session_energy": {
+        "name": "Sessie-energie"
+      },
+      "meter_reading": {
+        "name": "Meterstand"
+      },
+      "total_energy": {
+        "name": "Totale energie"
+      },
+      "total_ere_credits": {
+        "name": "Totaal ERE-credits"
+      },
+      "total_sessions": {
+        "name": "Totaal aantal sessies"
+      },
+      "ere_paid": {
+        "name": "ERE uitbetaald"
+      },
+      "ere_payable": {
+        "name": "ERE nog te ontvangen"
+      },
+      "ere_reserved": {
+        "name": "ERE gereserveerd"
+      },
+      "ere_unsold_forecast": {
+        "name": "ERE-prognose onverkocht (dit jaar)"
+      },
+      "ere_unsold_future_forecast": {
+        "name": "ERE-prognose onverkocht (resterend jaar)"
+      },
+      "ere_ytd_expected": {
+        "name": "ERE verwachte opbrengst (dit jaar)"
+      },
+      "ere_total_expected": {
+        "name": "ERE verwachte opbrengst (volledig jaar)"
+      },
+      "ere_indicative_price": {
+        "name": "ERE indicatieve prijs"
+      },
+      "ere_realized_avg_price": {
+        "name": "ERE gerealiseerde gemiddelde prijs"
+      },
+      "ere_paid_price_per_ere": {
+        "name": "ERE betaalde gemiddelde prijs"
+      },
+      "ere_fee_pct": {
+        "name": "ERE platformkosten"
+      },
+      "ere_allocatable": {
+        "name": "ERE toewijsbare credits"
+      },
+      "ere_forecast_confidence": {
+        "name": "ERE prognosebetrouwbaarheid"
+      },
+      "ere_forecast_history": {
+        "name": "ERE prognosegeschiedenis"
+      }
+    },
+    "binary_sensor": {
+      "is_charging": {
+        "name": "Aan het laden"
+      }
+    }
+  }
+}

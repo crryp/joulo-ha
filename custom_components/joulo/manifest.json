@@ -1,0 +1,11 @@
+{
+  "domain": "joulo",
+  "name": "Joulo",
+  "codeowners": ["@crryp"],
+  "config_flow": true,
+  "documentation": "https://github.com/crryp/joulo-ha",
+  "issue_tracker": "https://github.com/crryp/joulo-ha/issues",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "1.0.0"
+}
