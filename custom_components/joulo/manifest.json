@@ -4,8 +4,8 @@
   "codeowners": ["@crryp"],
   "config_flow": true,
   "documentation": "https://github.com/crryp/joulo-ha",
-  "issue_tracker": "https://github.com/crryp/joulo-ha/issues",
   "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/crryp/joulo-ha/issues",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
