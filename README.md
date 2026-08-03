@@ -45,6 +45,195 @@ can move up or down as market prices and allocations change.
 New chargers added in the Joulo dashboard appear automatically on the next poll,
 no reload required.
 
+## Example dashboard
+
+![Example ERE earnings dashboard](docs/dashboard-example.png)
+
+A Lovelace dashboard built entirely from the `ere_*` account sensors above. Requires
+three HACS frontend resources: [mushroom](https://github.com/piitaya/lovelace-mushroom),
+[apexcharts-card](https://github.com/RomRider/apexcharts-card), and
+[card-mod](https://github.com/thomasloven/lovelace-card-mod) (install all three via
+HACS → Frontend, then add them as dashboard resources if not done automatically).
+
+The entity IDs below are Dutch, since Home Assistant derives an entity's ID from its
+translated name at creation time and this dashboard was built against an instance
+running in Dutch (`nl`). On an English (`en`) instance, swap in the IDs from the
+right-hand column instead:
+
+| Sensor | Dutch entity ID (example below) | English entity ID |
+|---|---|---|
+| Total ERE credits | `sensor.joulo_account_totaal_ere_credits` | `sensor.joulo_account_total_ere_credits` |
+| ERE paid out | `sensor.joulo_account_ere_uitbetaald` | `sensor.joulo_account_ere_paid_out` |
+| ERE payable | `sensor.joulo_account_ere_nog_te_ontvangen` | `sensor.joulo_account_ere_payable` |
+| ERE expected revenue (YTD) | `sensor.joulo_account_ere_verwachte_opbrengst_dit_jaar` | `sensor.joulo_account_ere_expected_revenue_year_to_date` |
+| ERE platform fee | `sensor.joulo_account_ere_platformkosten` | `sensor.joulo_account_ere_platform_fee` |
+| ERE realized average price | `sensor.joulo_account_ere_gerealiseerde_gemiddelde_prijs` | `sensor.joulo_account_ere_realized_average_price` |
+
+If neither column matches what you see, check Developer Tools → States for the actual
+IDs — they depend on the language HA was set to when the Joulo integration was added.
+
+<details>
+<summary>Dashboard YAML</summary>
+
+```yaml
+type: vertical-stack
+cards:
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-title-card
+        subtitle: 💶 ERE Opbrengsten
+      - type: custom:mushroom-chips-card
+        alignment: end
+        chips:
+          - type: entity
+            entity: sensor.joulo_account_ere_platformkosten
+            name:
+              - type: text
+                text: Fee
+              - type: entity
+            icon: mdi:cart-percent
+            icon_color: deep-orange
+            content_info: state
+          - type: entity
+            entity: sensor.joulo_account_ere_gerealiseerde_gemiddelde_prijs
+            icon: mdi:currency-eur
+            icon_color: green
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-entity-card
+        entity: sensor.joulo_account_ere_uitbetaald
+        name: Uitbetaald
+        icon: mdi:cash-check
+        icon_color: green
+        layout: vertical
+        primary_info: state
+        secondary_info: name
+        card_mod:
+          style: |
+            ha-card {
+              background: #12161a;
+              border-radius: 16px;
+              border: 1px solid rgba(0, 212, 255, 0.15);
+              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+      - type: custom:mushroom-entity-card
+        entity: sensor.joulo_account_ere_nog_te_ontvangen
+        name: Te ontvangen
+        icon: mdi:cash-clock
+        icon_color: orange
+        layout: vertical
+        primary_info: state
+        secondary_info: name
+        card_mod:
+          style: |
+            ha-card {
+              background: #12161a;
+              border-radius: 16px;
+              border: 1px solid rgba(0, 212, 255, 0.15);
+              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+      - type: custom:mushroom-entity-card
+        entity: sensor.joulo_account_ere_verwachte_opbrengst_dit_jaar
+        name: Verwacht
+        icon: mdi:chart-line
+        icon_color: blue
+        layout: vertical
+        primary_info: state
+        secondary_info: name
+        card_mod:
+          style: |
+            ha-card {
+              background: #12161a;
+              border-radius: 16px;
+              border: 1px solid rgba(0, 212, 255, 0.15);
+              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+  - type: custom:apexcharts-card
+    card_mod:
+      style: |
+        ha-card {
+          background: #12161a;
+          border-radius: 16px;
+          border: 1px solid rgba(0, 212, 255, 0.15);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+          padding: 12px;
+        }
+        .apexcharts-tooltip {
+          background: #1e252b !important;
+          border: 1px solid #00d4ff !important;
+        }
+    header:
+      show: true
+      title: Totaal ERE's
+      show_states: false
+      colorize_states: false
+    graph_span: 31d
+    span:
+      end: day
+    update_interval: 10m
+    yaxis:
+      - id: credits
+        min: 0
+        apex_config:
+          forceNiceScale: true
+          decimalsInFloat: 2
+          tickAmount: 4
+          labels:
+            style:
+              colors: "#6c7a89"
+              fontSize: 10px
+    apex_config:
+      chart:
+        toolbar:
+          show: false
+      legend:
+        show: false
+      stroke:
+        curve: smooth
+      plotOptions:
+        bar:
+          borderRadius: 4
+          columnWidth: 70%
+      fill:
+        type: gradient
+        gradient:
+          type: vertical
+          opacityFrom: 0.75
+          opacityTo: 0.1
+          stops:
+            - 0
+            - 100
+      grid:
+        strokeDashArray: 4
+        borderColor: rgba(255, 255, 255, 0.05)
+      xaxis:
+        axisBorder:
+          show: false
+        axisTicks:
+          show: false
+        labels:
+          style:
+            colors: "#6c7a89"
+            fontSize: 10px
+    series:
+      - entity: sensor.joulo_account_totaal_ere_credits
+        type: area
+        name: Totaal Credits
+        yaxis_id: credits
+        unit: ERE
+        color: "#00ffb3"
+        stroke_width: 3
+        float_precision: 2
+        group_by:
+          duration: 1d
+          func: max
+        show:
+          extremas: max
+          in_header: true
+```
+
+</details>
+
 ## Configuration
 
 Both are available on an already-added entry from Settings → Devices & services → Joulo,
