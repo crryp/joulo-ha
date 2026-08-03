@@ -48,9 +48,7 @@ CHARGER_SENSORS: tuple[JouloChargerSensorDescription, ...] = (
     JouloChargerSensorDescription(
         key="status",
         translation_key="status",
-        device_class=SensorDeviceClass.ENUM,
-        options=["online", "offline", "unknown"],
-        value_fn=lambda charger: charger.get("status", "unknown"),
+        value_fn=lambda charger: charger.get("status"),
     ),
     JouloChargerSensorDescription(
         key="session_energy",

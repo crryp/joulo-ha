@@ -21,7 +21,7 @@ def mock_chargers_response() -> dict:
                 "id": "11111111-1111-1111-1111-111111111111",
                 "nickname": "Garage",
                 "connection_type": "easee",
-                "status": "online",
+                "status": "active",
                 "mid_certified": True,
                 "is_charging": True,
                 "current_session": {

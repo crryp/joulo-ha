@@ -41,12 +41,7 @@
   "entity": {
     "sensor": {
       "status": {
-        "name": "Status",
-        "state": {
-          "online": "Online",
-          "offline": "Offline",
-          "unknown": "Onbekend"
-        }
+        "name": "Status"
       },
       "session_energy": {
         "name": "Sessie-energie"
