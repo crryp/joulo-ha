@@ -102,9 +102,3 @@ pytest tests
 bash scripts/lint
 ```
 
-## Notes / TODO
-
-- `manifest.json` has placeholder `codeowners`/`documentation`/`issue_tracker`
-  URLs (`YOUR_GITHUB_USERNAME`) — update these once this repo has a home on GitHub.
-- Only the personal API token auth flow is implemented (not OAuth2 or the
-  Partner/CPO APIs).
