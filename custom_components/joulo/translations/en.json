@@ -46,6 +46,9 @@
       "session_energy": {
         "name": "Session energy"
       },
+      "active_tag_id": {
+        "name": "Active session RFID tag"
+      },
       "meter_reading": {
         "name": "Meter reading"
       },

@@ -13,7 +13,12 @@ Per linked charger (one HA device each):
 | `sensor.<charger>_status` | `GET /chargers` | 60s |
 | `binary_sensor.<charger>_charging` | `GET /chargers` | 60s |
 | `sensor.<charger>_session_energy` | `GET /chargers` | 60s |
+| `sensor.<charger>_active_tag_id` | `GET /chargers` | 60s |
 | `sensor.<charger>_meter_reading` (disabled by default) | `GET /chargers` | 60s |
+
+`active_tag_id` is the RFID/TAG id of the currently active session (e.g. to
+identify the vehicle/driver behind a charge) — `unknown` when no session is
+active.
 
 Account-wide (one "Joulo account" device):
 

@@ -46,6 +46,9 @@
       "session_energy": {
         "name": "Sessie-energie"
       },
+      "active_tag_id": {
+        "name": "RFID-tag actieve sessie"
+      },
       "meter_reading": {
         "name": "Meterstand"
       },

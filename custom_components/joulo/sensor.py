@@ -54,9 +54,21 @@ CHARGER_SENSORS: tuple[JouloChargerSensorDescription, ...] = (
         key="session_energy",
         translation_key="session_energy",
         device_class=SensorDeviceClass.ENERGY,
-        state_class=SensorStateClass.MEASUREMENT,
+        # HA disallows state_class=measurement for device_class=energy. total_increasing
+        # is the documented pattern for this exact case: a value that only increases
+        # within a session and is allowed to reset to 0 when a new session starts.
+        state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         value_fn=lambda charger: (charger.get("current_session") or {}).get("kwh_so_far"),
+    ),
+    JouloChargerSensorDescription(
+        key="active_tag_id",
+        translation_key="active_tag_id",
+        icon="mdi:credit-card-wireless-outline",
+        # RFID/TAG id of the active session, e.g. to identify the vehicle/driver
+        # behind a charge. None (unknown) when no session is active.
+        value_fn=lambda charger: (charger.get("current_session") or {}).get("id_tag")
+        or None,
     ),
     JouloChargerSensorDescription(
         key="meter_reading",

@@ -28,6 +28,7 @@ def mock_chargers_response() -> dict:
                     "id": "22222222-2222-2222-2222-222222222222",
                     "started_at": "2026-08-03T08:00:00Z",
                     "kwh_so_far": 4.2,
+                    "id_tag": "04A3B2C1",
                 },
                 "latest_meter_wh": 1234500,
                 "meter_updated_at": "2026-08-03T09:00:00Z",
