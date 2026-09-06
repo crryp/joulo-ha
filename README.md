@@ -1,5 +1,7 @@
 # Joulo for Home Assistant
 
+support me: https://joulo.nl/r/6CR5KF
+
 A [HACS](https://hacs.xyz/) custom integration for [Joulo](https://joulo.nl) — pulls charger
 status, active charging sessions, and lifetime energy/ERE statistics from the
 [Joulo API](https://developer.joulo.nl/) into Home Assistant.
