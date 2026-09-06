@@ -106,6 +106,15 @@ ACCOUNT_SENSORS: tuple[JouloAccountSensorDescription, ...] = (
     ),
 )
 
+def _current_quarter(pos: dict[str, Any]) -> dict[str, Any]:
+    """Return the in-progress quarter (final == False), or the most recent one."""
+    quarters = pos.get("quarters") or []
+    for quarter in quarters:
+        if not quarter.get("final"):
+            return quarter
+    return quarters[-1] if quarters else {}
+
+
 ERE_POSITION_SENSORS: tuple[JouloErePositionSensorDescription, ...] = (
     JouloErePositionSensorDescription(
         key="ere_paid",
@@ -146,6 +155,36 @@ ERE_POSITION_SENSORS: tuple[JouloErePositionSensorDescription, ...] = (
         state_class=SensorStateClass.TOTAL,
         native_unit_of_measurement="EUR",
         value_fn=lambda pos: (pos.get("unsold") or {}).get("future_forecast_net_eur"),
+    ),
+    JouloErePositionSensorDescription(
+        key="ere_unsold_ytd_forecast",
+        translation_key="ere_unsold_ytd_forecast",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.TOTAL,
+        native_unit_of_measurement="EUR",
+        value_fn=lambda pos: (pos.get("unsold") or {}).get("ytd_forecast_net_eur"),
+    ),
+    JouloErePositionSensorDescription(
+        key="ere_unsold_ytd_ere",
+        translation_key="ere_unsold_ytd_ere",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="credits",
+        value_fn=lambda pos: (pos.get("unsold") or {}).get("ytd_ere"),
+    ),
+    JouloErePositionSensorDescription(
+        key="ere_pending_forecast",
+        translation_key="ere_pending_forecast",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.TOTAL,
+        native_unit_of_measurement="EUR",
+        value_fn=lambda pos: pos.get("pending_forecast_net_eur"),
+    ),
+    JouloErePositionSensorDescription(
+        key="ere_pending_ere",
+        translation_key="ere_pending_ere",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="credits",
+        value_fn=lambda pos: pos.get("pending_ere"),
     ),
     JouloErePositionSensorDescription(
         key="ere_ytd_expected",
@@ -217,6 +256,45 @@ ERE_POSITION_SENSORS: tuple[JouloErePositionSensorDescription, ...] = (
         native_unit_of_measurement=UnitOfTime.DAYS,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda pos: pos.get("forecast_history_days"),
+    ),
+    JouloErePositionSensorDescription(
+        key="ere_current_quarter",
+        translation_key="ere_current_quarter",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda pos: _current_quarter(pos).get("quarter"),
+    ),
+    JouloErePositionSensorDescription(
+        key="ere_current_quarter_price_per_ere",
+        translation_key="ere_current_quarter_price_per_ere",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=EUR_PER_ERE,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda pos: _current_quarter(pos).get("price_per_ere"),
+    ),
+    JouloErePositionSensorDescription(
+        key="ere_current_quarter_sold_ere",
+        translation_key="ere_current_quarter_sold_ere",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="credits",
+        value_fn=lambda pos: _current_quarter(pos).get("sold_ere"),
+    ),
+    JouloErePositionSensorDescription(
+        key="ere_current_quarter_unsold_ere",
+        translation_key="ere_current_quarter_unsold_ere",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="credits",
+        value_fn=lambda pos: _current_quarter(pos).get("unsold_ere"),
+    ),
+    JouloErePositionSensorDescription(
+        key="ere_current_quarter_realized",
+        translation_key="ere_current_quarter_realized",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.TOTAL,
+        native_unit_of_measurement="EUR",
+        value_fn=lambda pos: _current_quarter(pos).get("realized_net_eur"),
+        extra_attrs_fn=lambda pos: {
+            "net_eur_by_status": _current_quarter(pos).get("net_eur_by_status")
+        },
     ),
 )
 

@@ -71,10 +71,22 @@
         "name": "ERE reserved"
       },
       "ere_unsold_forecast": {
-        "name": "ERE unsold forecast (year to date)"
+        "name": "ERE unsold forecast (total)"
       },
       "ere_unsold_future_forecast": {
         "name": "ERE unsold forecast (rest of year)"
+      },
+      "ere_unsold_ytd_forecast": {
+        "name": "ERE unsold forecast (year to date)"
+      },
+      "ere_unsold_ytd_ere": {
+        "name": "ERE unsold credits (year to date)"
+      },
+      "ere_pending_forecast": {
+        "name": "ERE pending forecast (in review)"
+      },
+      "ere_pending_ere": {
+        "name": "ERE pending credits (in review)"
       },
       "ere_ytd_expected": {
         "name": "ERE expected revenue (year to date)"
@@ -102,6 +114,21 @@
       },
       "ere_forecast_history": {
         "name": "ERE forecast history"
+      },
+      "ere_current_quarter": {
+        "name": "ERE current quarter"
+      },
+      "ere_current_quarter_price_per_ere": {
+        "name": "ERE current quarter price"
+      },
+      "ere_current_quarter_sold_ere": {
+        "name": "ERE current quarter sold credits"
+      },
+      "ere_current_quarter_unsold_ere": {
+        "name": "ERE current quarter unsold credits"
+      },
+      "ere_current_quarter_realized": {
+        "name": "ERE current quarter realized revenue"
       }
     },
     "binary_sensor": {

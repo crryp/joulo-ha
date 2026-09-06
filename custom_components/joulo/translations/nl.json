@@ -71,10 +71,22 @@
         "name": "ERE gereserveerd"
       },
       "ere_unsold_forecast": {
-        "name": "ERE-prognose onverkocht (dit jaar)"
+        "name": "ERE-prognose onverkocht (totaal)"
       },
       "ere_unsold_future_forecast": {
         "name": "ERE-prognose onverkocht (resterend jaar)"
+      },
+      "ere_unsold_ytd_forecast": {
+        "name": "ERE-prognose onverkocht (dit jaar)"
+      },
+      "ere_unsold_ytd_ere": {
+        "name": "ERE-credits onverkocht (dit jaar)"
+      },
+      "ere_pending_forecast": {
+        "name": "ERE-prognose in controle"
+      },
+      "ere_pending_ere": {
+        "name": "ERE-credits in controle"
       },
       "ere_ytd_expected": {
         "name": "ERE verwachte opbrengst (dit jaar)"
@@ -102,6 +114,21 @@
       },
       "ere_forecast_history": {
         "name": "ERE prognosegeschiedenis"
+      },
+      "ere_current_quarter": {
+        "name": "ERE huidig kwartaal"
+      },
+      "ere_current_quarter_price_per_ere": {
+        "name": "ERE huidig kwartaal prijs"
+      },
+      "ere_current_quarter_sold_ere": {
+        "name": "ERE huidig kwartaal verkochte credits"
+      },
+      "ere_current_quarter_unsold_ere": {
+        "name": "ERE huidig kwartaal onverkochte credits"
+      },
+      "ere_current_quarter_realized": {
+        "name": "ERE huidig kwartaal gerealiseerde opbrengst"
       }
     },
     "binary_sensor": {

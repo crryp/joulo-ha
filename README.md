@@ -30,8 +30,12 @@ Account-wide (one "Joulo account" device):
 | `sensor.joulo_ere_paid` | `GET /ere-position` | 1h |
 | `sensor.joulo_ere_payable` | `GET /ere-position` | 1h |
 | `sensor.joulo_ere_reserved` | `GET /ere-position` | 1h |
-| `sensor.joulo_ere_unsold_forecast` | `GET /ere-position` | 1h |
-| `sensor.joulo_ere_unsold_future_forecast` | `GET /ere-position` | 1h |
+| `sensor.joulo_ere_unsold_forecast` (total) | `GET /ere-position` | 1h |
+| `sensor.joulo_ere_unsold_future_forecast` (rest of year) | `GET /ere-position` | 1h |
+| `sensor.joulo_ere_unsold_ytd_forecast` (year to date) | `GET /ere-position` | 1h |
+| `sensor.joulo_ere_unsold_ytd_ere` (credits, year to date) | `GET /ere-position` | 1h |
+| `sensor.joulo_ere_pending_forecast` (in review) | `GET /ere-position` | 1h |
+| `sensor.joulo_ere_pending_ere` (credits, in review) | `GET /ere-position` | 1h |
 | `sensor.joulo_ere_ytd_expected` | `GET /ere-position` | 1h |
 | `sensor.joulo_ere_total_expected` | `GET /ere-position` | 1h |
 | `sensor.joulo_ere_indicative_price` (diagnostic) | `GET /ere-position` | 1h |
@@ -41,11 +45,22 @@ Account-wide (one "Joulo account" device):
 | `sensor.joulo_ere_allocatable` (diagnostic) | `GET /ere-position` | 1h |
 | `sensor.joulo_ere_forecast_confidence` (diagnostic) | `GET /ere-position` | 1h |
 | `sensor.joulo_ere_forecast_history` (diagnostic) | `GET /ere-position` | 1h |
+| `sensor.joulo_ere_current_quarter` (diagnostic) | `GET /ere-position` | 1h |
+| `sensor.joulo_ere_current_quarter_price_per_ere` (diagnostic) | `GET /ere-position` | 1h |
+| `sensor.joulo_ere_current_quarter_sold_ere` | `GET /ere-position` | 1h |
+| `sensor.joulo_ere_current_quarter_unsold_ere` | `GET /ere-position` | 1h |
+| `sensor.joulo_ere_current_quarter_realized` | `GET /ere-position` | 1h |
 
 The `ere_indicative_price` sensor also carries the quarterly price breakdown
 (`quarters`) from the API as an extra state attribute. All euro-denominated
 `ere_*` figures other than `ere_paid` are Joulo's own forecasts/estimates and
 can move up or down as market prices and allocations change.
+
+The `ere_current_quarter*` sensors track whichever quarter the API marks as
+in-progress (`final: false`) and roll over to the next quarter automatically
+— no reconfiguration needed when a new quarter starts. `ere_current_quarter_realized`
+also carries a `net_eur_by_status` (paid/payable/reserved) breakdown as an
+extra state attribute.
 
 New chargers added in the Joulo dashboard appear automatically on the next poll,
 no reload required.
