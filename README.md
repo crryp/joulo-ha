@@ -27,6 +27,7 @@ Account-wide (one "Joulo account" device):
 | `sensor.joulo_total_energy` | `GET /energy` | 1h |
 | `sensor.joulo_total_ere_credits` | `GET /energy` | 1h |
 | `sensor.joulo_total_sessions` | `GET /energy` | 1h |
+| `sensor.joulo_ere_compliance_year` (diagnostic) | `GET /ere-position` | 1h |
 | `sensor.joulo_ere_paid` | `GET /ere-position` | 1h |
 | `sensor.joulo_ere_payable` | `GET /ere-position` | 1h |
 | `sensor.joulo_ere_reserved` | `GET /ere-position` | 1h |

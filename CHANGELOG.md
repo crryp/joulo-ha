@@ -2,6 +2,16 @@
 
 All notable changes to this integration are documented in this file.
 
+## [1.1.1] - 2026-09-06
+
+### Added
+
+- New diagnostic sensor `ere_compliance_year`, exposing `/ere-position`'s
+  `compliance_year` field. Every other `ere_*` sensor is scoped to whichever
+  year the Joulo API defaults to (the current calendar year), so this makes
+  it unambiguous which year's figures you're looking at — especially useful
+  right at the New Year boundary.
+
 ## [1.1.0] - 2026-09-06
 
 ### Added

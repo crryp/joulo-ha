@@ -117,6 +117,16 @@ def _current_quarter(pos: dict[str, Any]) -> dict[str, Any]:
 
 ERE_POSITION_SENSORS: tuple[JouloErePositionSensorDescription, ...] = (
     JouloErePositionSensorDescription(
+        key="ere_compliance_year",
+        translation_key="ere_compliance_year",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        # /ere-position defaults to the current calendar year and every other
+        # ere_* sensor is scoped to it. Exposed so it's unambiguous which
+        # year the rest of the figures apply to, especially right at the
+        # New Year boundary.
+        value_fn=lambda pos: pos.get("compliance_year"),
+    ),
+    JouloErePositionSensorDescription(
         key="ere_paid",
         translation_key="ere_paid",
         device_class=SensorDeviceClass.MONETARY,

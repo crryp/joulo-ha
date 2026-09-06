@@ -54,6 +54,9 @@ async def test_ere_position_sensors(
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
+    compliance_year = hass.states.get("sensor.joulo_account_ere_compliance_year")
+    assert compliance_year.state == "2026"
+
     state = hass.states.get("sensor.joulo_account_ere_paid_out")
     assert state is not None
     assert state.state == "12450.3"

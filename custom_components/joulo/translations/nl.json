@@ -61,6 +61,9 @@
       "total_sessions": {
         "name": "Totaal aantal sessies"
       },
+      "ere_compliance_year": {
+        "name": "ERE compliance jaar"
+      },
       "ere_paid": {
         "name": "ERE uitbetaald"
       },

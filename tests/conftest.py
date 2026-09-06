@@ -54,6 +54,7 @@ def mock_energy_response() -> dict:
 def mock_ere_position_response() -> dict:
     """A representative /ere-position response."""
     return {
+        "compliance_year": 2026,
         "effective_fee_pct": 8,
         "indicative_price_per_ere": 78.5,
         "realized_avg_price": 74.2,
