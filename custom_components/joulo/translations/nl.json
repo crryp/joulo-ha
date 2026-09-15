@@ -33,7 +33,8 @@
         "data": {
           "chargers_scan_interval": "Pollinginterval laadpalen",
           "energy_scan_interval": "Pollinginterval energie",
-          "ere_position_scan_interval": "Pollinginterval ERE-positie"
+          "ere_position_scan_interval": "Pollinginterval ERE-positie",
+          "sessions_scan_interval": "Pollinginterval sessies"
         }
       }
     }
@@ -51,6 +52,9 @@
       },
       "meter_reading": {
         "name": "Meterstand"
+      },
+      "estimated_euro": {
+        "name": "Geschatte ERE-uitbetaling sessie"
       },
       "total_energy": {
         "name": "Totale energie"

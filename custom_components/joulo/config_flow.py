@@ -27,9 +27,11 @@ from .const import (
     CONF_CHARGERS_SCAN_INTERVAL,
     CONF_ENERGY_SCAN_INTERVAL,
     CONF_ERE_POSITION_SCAN_INTERVAL,
+    CONF_SESSIONS_SCAN_INTERVAL,
     DEFAULT_CHARGERS_SCAN_INTERVAL,
     DEFAULT_ENERGY_SCAN_INTERVAL,
     DEFAULT_ERE_POSITION_SCAN_INTERVAL,
+    DEFAULT_SESSIONS_SCAN_INTERVAL,
     DOMAIN,
 )
 
@@ -154,6 +156,12 @@ class JouloOptionsFlow(OptionsFlow):
                         DEFAULT_ERE_POSITION_SCAN_INTERVAL,
                     ),
                 ): _scan_interval_selector(minimum=60),
+                vol.Optional(
+                    CONF_SESSIONS_SCAN_INTERVAL,
+                    default=options.get(
+                        CONF_SESSIONS_SCAN_INTERVAL, DEFAULT_SESSIONS_SCAN_INTERVAL
+                    ),
+                ): _scan_interval_selector(minimum=10),
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema)

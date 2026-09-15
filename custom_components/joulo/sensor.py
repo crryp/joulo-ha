@@ -17,7 +17,13 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import JouloConfigEntry
-from .entity import JouloAccountEntity, JouloChargerEntity, JouloErePositionEntity
+from .coordinator import JouloChargersCoordinator, JouloSessionsCoordinator
+from .entity import (
+    JouloAccountEntity,
+    JouloChargerEntity,
+    JouloChargerSessionEntity,
+    JouloErePositionEntity,
+)
 
 EUR_PER_ERE = "EUR/ERE"
 
@@ -319,6 +325,7 @@ async def async_setup_entry(
     chargers_coordinator = runtime_data.chargers_coordinator
     energy_coordinator = runtime_data.energy_coordinator
     ere_position_coordinator = runtime_data.ere_position_coordinator
+    sessions_coordinator = runtime_data.sessions_coordinator
 
     entities: list[SensorEntity] = [
         JouloAccountSensor(energy_coordinator, entry, description)
@@ -333,8 +340,15 @@ async def async_setup_entry(
     def _add_charger_entities(charger_id: str) -> None:
         known_charger_ids.add(charger_id)
         async_add_entities(
-            JouloChargerSensor(chargers_coordinator, charger_id, description)
-            for description in CHARGER_SENSORS
+            [
+                JouloChargerSensor(chargers_coordinator, charger_id, description)
+                for description in CHARGER_SENSORS
+            ]
+            + [
+                JouloEstimatedEuroSensor(
+                    sessions_coordinator, chargers_coordinator, charger_id
+                )
+            ]
         )
 
     for charger_id in chargers_coordinator.data:
@@ -368,6 +382,94 @@ class JouloChargerSensor(JouloChargerEntity, SensorEntity):
     @property
     def native_value(self) -> Any:
         return self.entity_description.value_fn(self.charger)
+
+
+class JouloEstimatedEuroSensor(JouloChargerSessionEntity, SensorEntity):
+    """Estimated ERE payout for the charger's in-progress charging session.
+
+    0 while idle (no session in progress). While charging, Joulo's API
+    doesn't compute the real estimated_euro until the session ends (it stays
+    null for the session's whole duration, same as `kwh`/`ere_credits` on
+    that same /sessions entry) - so until then this derives a live
+    approximation instead: the charger's own most recent finished session
+    gives an ERE-credits-per-kWh rate (Joulo applies this very consistently
+    per charger - it's a regulatory constant, not something that varies
+    session to session), applied to the live kwh_so_far from GET /chargers
+    and priced using the account's current estimate_basis. `is_estimate` in
+    the extra attributes says whether the current state is that live
+    approximation or a real, finalized figure.
+    """
+
+    _attr_translation_key = "estimated_euro"
+    _attr_device_class = SensorDeviceClass.MONETARY
+    # Matches the ere_* account sensors: a monetary value that is allowed to
+    # reset (a new session starts with no estimate of its own yet).
+    _attr_state_class = SensorStateClass.TOTAL
+    _attr_native_unit_of_measurement = "EUR"
+
+    def __init__(
+        self,
+        coordinator: JouloSessionsCoordinator,
+        chargers_coordinator: JouloChargersCoordinator,
+        charger_id: str,
+    ) -> None:
+        super().__init__(coordinator, chargers_coordinator, charger_id)
+        self._attr_unique_id = f"{charger_id}_estimated_euro"
+
+    @property
+    def _live_estimate(self) -> float | None:
+        """Approximate the still-active session's payout from live kWh."""
+        live_kwh = self.live_kwh_so_far
+        if not live_kwh:
+            return None
+
+        reference = self.latest_completed_session
+        reference_kwh = reference.get("kwh")
+        reference_credits = reference.get("ere_credits")
+        if not reference_kwh or reference_credits is None:
+            # No finished session yet for this charger to derive a rate from.
+            return None
+
+        basis = self.estimate_basis
+        price_per_ere = basis.get("price_per_ere")
+        fee_pct = basis.get("effective_fee_pct")
+        if price_per_ere is None or fee_pct is None:
+            return None
+
+        credits_per_kwh = reference_credits / reference_kwh
+        estimated_credits = live_kwh * credits_per_kwh
+        return round(estimated_credits * price_per_ere * (1 - fee_pct / 100), 2)
+
+    @property
+    def _resolved(self) -> tuple[float, bool]:
+        """Return (value, is_estimate) for the charger's current state.
+
+        Keyed off the charger's own live is_charging (from the always-fast
+        chargers coordinator) rather than this session's own `status`, since
+        /sessions can lag a beat behind /chargers after a session just ended.
+
+        - Idle (no session right now): 0.
+        - Charging, and Joulo has already finalized this session's estimate:
+          that exact figure (edge case - normally only happens once idle).
+        - Charging, not finalized yet: this class's own live approximation
+          (0 if there's no history yet to derive a rate from).
+        """
+        charger = self._chargers_coordinator.data.get(self._charger_id, {})
+        if not charger.get("is_charging"):
+            return 0.0, False
+
+        finalized = self.session.get("estimated_euro")
+        if finalized is not None:
+            return finalized, False
+        return self._live_estimate or 0.0, True
+
+    @property
+    def native_value(self) -> Any:
+        return self._resolved[0]
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {"is_estimate": self._resolved[1]}
 
 
 class JouloAccountSensor(JouloAccountEntity, SensorEntity):

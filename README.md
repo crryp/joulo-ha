@@ -17,10 +17,29 @@ Per linked charger (one HA device each):
 | `sensor.<charger>_session_energy` | `GET /chargers` | 60s |
 | `sensor.<charger>_active_tag_id` | `GET /chargers` | 60s |
 | `sensor.<charger>_meter_reading` (disabled by default) | `GET /chargers` | 60s |
+| `sensor.<charger>_estimated_euro` | `GET /chargers` + `GET /sessions` | 60s while charging, 1h while idle |
 
 `active_tag_id` is the RFID/TAG id of the currently active session (e.g. to
 identify the vehicle/driver behind a charge) — `unknown` when no session is
 active.
+
+`estimated_euro` is the *ERE payout* estimate for the charger's in-progress
+session — not what you paid for the electricity, and `0` while idle (no
+session in progress). Joulo's own `GET /sessions` only fills in a session's
+real `estimated_euro`/`ere_credits` once it ends, so while charging this is
+instead a live approximation: the charger's own most recent finished
+session gives an ERE-credits-per-kWh rate (all pulled from the API - no
+hardcoded pricing or conversion factor), applied to the live `kwh_so_far`
+from `GET /chargers` and priced using `GET /sessions`' current
+`estimate_basis` (`price_per_ere`, `effective_fee_pct`). Once the session
+ends, this switches to Joulo's own exact figure. The `is_estimate` extra
+attribute says which case a given state came from.
+
+Since `/sessions` can only change while a session is in progress, it's polled
+on the fast, configurable interval only while at least one charger is
+actively charging, and falls back to a fixed 1h cadence while every charger
+is idle — switching straight back to the fast interval (with an immediate
+refresh) the moment a new session starts.
 
 Account-wide (one "Joulo account" device):
 
@@ -264,9 +283,9 @@ no need to remove and re-add:
 
 - **⋮ → Reconfigure** — swap in a new personal API token (e.g. after rotating it in the
   Joulo dashboard) without recreating the entry or losing entity history.
-- **⋮ → Configure** (options) — tune the poll interval (in seconds) for each of the three
-  endpoints (chargers, energy, ERE position) independently. Changing a value reloads the
-  entry immediately with the new intervals.
+- **⋮ → Configure** (options) — tune the poll interval (in seconds) for each of the four
+  endpoints (chargers, energy, ERE position, sessions) independently. Changing a value
+  reloads the entry immediately with the new intervals.
 
 ## Installation
 

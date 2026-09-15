@@ -4,6 +4,7 @@ from __future__ import annotations
 from unittest.mock import patch
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.joulo.const import CONF_API_TOKEN, DOMAIN
@@ -32,6 +33,7 @@ async def test_ere_position_sensors(
     mock_chargers_response: dict,
     mock_energy_response: dict,
     mock_ere_position_response: dict,
+    mock_sessions_response: dict,
 ) -> None:
     """The /ere-position euro fields are exposed as sensors on the account device."""
     entry = MockConfigEntry(domain=DOMAIN, data={CONF_API_TOKEN: "test-token"})
@@ -49,6 +51,10 @@ async def test_ere_position_sensors(
         patch(
             "custom_components.joulo.api.JouloApiClient.async_get_ere_position",
             return_value=mock_ere_position_response,
+        ),
+        patch(
+            "custom_components.joulo.api.JouloApiClient.async_get_sessions",
+            return_value=mock_sessions_response,
         ),
     ):
         assert await hass.config_entries.async_setup(entry.entry_id)
@@ -126,3 +132,155 @@ async def test_ere_position_sensors(
         "payable": 0,
         "reserved": 11.24,
     }
+
+
+async def _setup_estimated_euro_entry(
+    hass: HomeAssistant,
+    mock_chargers_response: dict,
+    mock_energy_response: dict,
+    mock_ere_position_response: dict,
+    mock_sessions_response: dict,
+) -> str:
+    """Set up the integration and return the estimated_euro sensor's entity_id."""
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_API_TOKEN: "test-token"})
+    entry.add_to_hass(hass)
+
+    with (
+        patch(
+            "custom_components.joulo.api.JouloApiClient.async_get_chargers",
+            return_value=mock_chargers_response["chargers"],
+        ),
+        patch(
+            "custom_components.joulo.api.JouloApiClient.async_get_energy",
+            return_value=mock_energy_response,
+        ),
+        patch(
+            "custom_components.joulo.api.JouloApiClient.async_get_ere_position",
+            return_value=mock_ere_position_response,
+        ),
+        patch(
+            "custom_components.joulo.api.JouloApiClient.async_get_sessions",
+            return_value=mock_sessions_response,
+        ),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    registry = er.async_get(hass)
+    charger_id = mock_chargers_response["chargers"][0]["id"]
+    entity_id = registry.async_get_entity_id(
+        "sensor", DOMAIN, f"{charger_id}_estimated_euro"
+    )
+    assert entity_id is not None
+    return entity_id
+
+
+async def test_estimated_euro_live_estimate_during_active_session(
+    hass: HomeAssistant,
+    mock_chargers_response: dict,
+    mock_energy_response: dict,
+    mock_ere_position_response: dict,
+    mock_sessions_response: dict,
+) -> None:
+    """While charging, Joulo's own estimated_euro is null (it fills in only once
+    the session ends), so the sensor derives a live approximation from the
+    charger's last finished session's ERE-credits-per-kWh rate applied to the
+    live kwh_so_far from GET /chargers."""
+    entity_id = await _setup_estimated_euro_entry(
+        hass,
+        mock_chargers_response,
+        mock_energy_response,
+        mock_ere_position_response,
+        mock_sessions_response,
+    )
+
+    state = hass.states.get(entity_id)
+    # kwh_so_far=4.2 (from mock_chargers_response) * (2.81/8.46 ere credits/kWh,
+    # from the last finished session in mock_sessions_response) * price_per_ere
+    # 0.483 * (1 - 8%) = 0.62.
+    assert state.state == "0.62"
+    assert state.attributes["unit_of_measurement"] == "EUR"
+    assert state.attributes["device_class"] == "monetary"
+    assert state.attributes["is_estimate"] is True
+
+
+async def test_estimated_euro_zero_while_charging_without_session_history(
+    hass: HomeAssistant,
+    mock_chargers_response: dict,
+    mock_energy_response: dict,
+    mock_ere_position_response: dict,
+    mock_sessions_response: dict,
+) -> None:
+    """No finished session yet to derive a rate from -> 0 (still an estimate,
+    just can't be computed yet), not unknown."""
+    mock_sessions_response = {
+        **mock_sessions_response,
+        "sessions": [mock_sessions_response["sessions"][0]],  # only the active one
+    }
+    entity_id = await _setup_estimated_euro_entry(
+        hass,
+        mock_chargers_response,
+        mock_energy_response,
+        mock_ere_position_response,
+        mock_sessions_response,
+    )
+
+    state = hass.states.get(entity_id)
+    assert state.state == "0.0"
+    assert state.attributes["is_estimate"] is True
+
+
+async def test_estimated_euro_prefers_finalized_value_over_live_estimate(
+    hass: HomeAssistant,
+    mock_chargers_response: dict,
+    mock_energy_response: dict,
+    mock_ere_position_response: dict,
+    mock_sessions_response: dict,
+) -> None:
+    """If Joulo has already filled in a real estimated_euro for the charger's
+    session, use that exact figure instead of the live approximation."""
+    mock_sessions_response = {
+        **mock_sessions_response,
+        "sessions": [mock_sessions_response["sessions"][1]],  # the completed one
+    }
+    entity_id = await _setup_estimated_euro_entry(
+        hass,
+        mock_chargers_response,
+        mock_energy_response,
+        mock_ere_position_response,
+        mock_sessions_response,
+    )
+
+    state = hass.states.get(entity_id)
+    assert state.state == "1.25"
+    assert state.attributes["is_estimate"] is False
+
+
+async def test_estimated_euro_zero_when_idle(
+    hass: HomeAssistant,
+    mock_chargers_response: dict,
+    mock_energy_response: dict,
+    mock_ere_position_response: dict,
+    mock_sessions_response: dict,
+) -> None:
+    """No session in progress -> 0, regardless of what the last session paid out."""
+    idle_chargers_response = {
+        "chargers": [
+            {
+                **mock_chargers_response["chargers"][0],
+                "is_charging": False,
+                "current_session": None,
+            }
+        ]
+    }
+    entity_id = await _setup_estimated_euro_entry(
+        hass,
+        idle_chargers_response,
+        mock_energy_response,
+        mock_ere_position_response,
+        mock_sessions_response,
+    )
+
+    state = hass.states.get(entity_id)
+    assert state.state == "0.0"
+    assert state.attributes["is_estimate"] is False

@@ -33,7 +33,8 @@
         "data": {
           "chargers_scan_interval": "Chargers poll interval",
           "energy_scan_interval": "Energy poll interval",
-          "ere_position_scan_interval": "ERE position poll interval"
+          "ere_position_scan_interval": "ERE position poll interval",
+          "sessions_scan_interval": "Sessions poll interval"
         }
       }
     }
@@ -51,6 +52,9 @@
       },
       "meter_reading": {
         "name": "Meter reading"
+      },
+      "estimated_euro": {
+        "name": "Estimated session ERE payout"
       },
       "total_energy": {
         "name": "Total energy"

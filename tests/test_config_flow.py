@@ -16,6 +16,7 @@ from custom_components.joulo.const import (
     CONF_CHARGERS_SCAN_INTERVAL,
     CONF_ENERGY_SCAN_INTERVAL,
     CONF_ERE_POSITION_SCAN_INTERVAL,
+    CONF_SESSIONS_SCAN_INTERVAL,
     DOMAIN,
 )
 
@@ -65,6 +66,7 @@ async def test_reconfigure_flow_updates_token(
     mock_chargers_response: dict,
     mock_energy_response: dict,
     mock_ere_position_response: dict,
+    mock_sessions_response: dict,
 ) -> None:
     """Reconfigure swaps in a rotated token for the same entry, no re-add needed."""
     entry = MockConfigEntry(
@@ -86,6 +88,10 @@ async def test_reconfigure_flow_updates_token(
         patch(
             "custom_components.joulo.api.JouloApiClient.async_get_ere_position",
             return_value=mock_ere_position_response,
+        ),
+        patch(
+            "custom_components.joulo.api.JouloApiClient.async_get_sessions",
+            return_value=mock_sessions_response,
         ),
     ):
         assert await hass.config_entries.async_setup(entry.entry_id)
@@ -117,6 +123,7 @@ async def test_options_flow_updates_scan_intervals(
     mock_chargers_response: dict,
     mock_energy_response: dict,
     mock_ere_position_response: dict,
+    mock_sessions_response: dict,
 ) -> None:
     """Changing the options reloads the entry with new coordinator polling intervals."""
     entry = MockConfigEntry(domain=DOMAIN, data={CONF_API_TOKEN: "test-token"})
@@ -135,6 +142,10 @@ async def test_options_flow_updates_scan_intervals(
             "custom_components.joulo.api.JouloApiClient.async_get_ere_position",
             return_value=mock_ere_position_response,
         ),
+        patch(
+            "custom_components.joulo.api.JouloApiClient.async_get_sessions",
+            return_value=mock_sessions_response,
+        ),
     ):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
@@ -149,6 +160,7 @@ async def test_options_flow_updates_scan_intervals(
                 CONF_CHARGERS_SCAN_INTERVAL: 30,
                 CONF_ENERGY_SCAN_INTERVAL: 1800,
                 CONF_ERE_POSITION_SCAN_INTERVAL: 1800,
+                CONF_SESSIONS_SCAN_INTERVAL: 30,
             },
         )
         await hass.async_block_till_done()
@@ -160,4 +172,7 @@ async def test_options_flow_updates_scan_intervals(
     )
     assert entry.runtime_data.energy_coordinator.update_interval == timedelta(
         seconds=1800
+    )
+    assert entry.runtime_data.sessions_coordinator.update_interval == timedelta(
+        seconds=30
     )
