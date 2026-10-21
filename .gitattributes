@@ -1,0 +1,2 @@
+# Shell scripts run inside the Linux devcontainer; CRLF breaks them (set: pipefail).
+scripts/* text eol=lf
