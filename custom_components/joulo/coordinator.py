@@ -6,6 +6,7 @@ from datetime import timedelta
 from typing import Any
 
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import JouloApiClient, JouloApiError, JouloAuthError
@@ -32,7 +33,7 @@ class JouloChargersCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]])
         try:
             chargers = await self._client.async_get_chargers()
         except JouloAuthError as err:
-            raise UpdateFailed(f"Authentication error: {err}") from err
+            raise ConfigEntryAuthFailed(f"Authentication error: {err}") from err
         except JouloApiError as err:
             raise UpdateFailed(f"Error fetching chargers: {err}") from err
 
@@ -57,7 +58,7 @@ class JouloEnergyCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             return await self._client.async_get_energy()
         except JouloAuthError as err:
-            raise UpdateFailed(f"Authentication error: {err}") from err
+            raise ConfigEntryAuthFailed(f"Authentication error: {err}") from err
         except JouloApiError as err:
             raise UpdateFailed(f"Error fetching energy statistics: {err}") from err
 
@@ -80,7 +81,7 @@ class JouloErePositionCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             return await self._client.async_get_ere_position()
         except JouloAuthError as err:
-            raise UpdateFailed(f"Authentication error: {err}") from err
+            raise ConfigEntryAuthFailed(f"Authentication error: {err}") from err
         except JouloApiError as err:
             raise UpdateFailed(f"Error fetching ERE position: {err}") from err
 
@@ -109,7 +110,7 @@ class JouloSessionsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             result = await self._client.async_get_sessions(limit=SESSIONS_POLL_LIMIT)
         except JouloAuthError as err:
-            raise UpdateFailed(f"Authentication error: {err}") from err
+            raise ConfigEntryAuthFailed(f"Authentication error: {err}") from err
         except JouloApiError as err:
             raise UpdateFailed(f"Error fetching sessions: {err}") from err
 

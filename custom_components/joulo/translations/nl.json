@@ -14,6 +14,13 @@
         "data": {
           "api_token": "API-token"
         }
+      },
+      "reauth_confirm": {
+        "title": "Joulo opnieuw verifiëren",
+        "description": "De Joulo API heeft het opgeslagen API-token geweigerd (mogelijk ingetrokken of verlopen). Voer een nieuw persoonlijk API-token in, gegenereerd in het Joulo-dashboard onder Instellingen → API.",
+        "data": {
+          "api_token": "API-token"
+        }
       }
     },
     "error": {
@@ -22,7 +29,8 @@
     },
     "abort": {
       "already_configured": "Dit Joulo-account is al geconfigureerd.",
-      "reconfigure_successful": "Het Joulo API-token is bijgewerkt."
+      "reconfigure_successful": "Het Joulo API-token is bijgewerkt.",
+      "reauth_successful": "Het Joulo API-token is bijgewerkt."
     }
   },
   "options": {

@@ -176,3 +176,66 @@ async def test_options_flow_updates_scan_intervals(
     assert entry.runtime_data.sessions_coordinator.update_interval == timedelta(
         seconds=30
     )
+
+
+async def test_auth_failure_starts_reauth(hass: HomeAssistant) -> None:
+    """A 401/403 from the API puts the entry in reauth instead of just retrying."""
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_API_TOKEN: "revoked-token"})
+    entry.add_to_hass(hass)
+
+    with patch(
+        "custom_components.joulo.api.JouloApiClient.async_get_chargers",
+        side_effect=JouloAuthError("revoked"),
+    ):
+        assert not await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    assert entry.state is config_entries.ConfigEntryState.SETUP_ERROR
+    flows = hass.config_entries.flow.async_progress()
+    assert len(flows) == 1
+    assert flows[0]["context"]["source"] == config_entries.SOURCE_REAUTH
+    assert flows[0]["context"]["entry_id"] == entry.entry_id
+
+
+async def test_reauth_flow_updates_token(
+    hass: HomeAssistant, mock_chargers_response: dict
+) -> None:
+    """Reauth swaps in a new token for the existing entry."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={CONF_API_TOKEN: "old-token"},
+        unique_id=_token_fingerprint("old-token"),
+    )
+    entry.add_to_hass(hass)
+
+    result = await entry.start_reauth_flow(hass)
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "reauth_confirm"
+
+    with patch(
+        "custom_components.joulo.config_flow.JouloApiClient.async_get_chargers",
+        side_effect=JouloAuthError("still bad"),
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {CONF_API_TOKEN: "still-bad-token"}
+        )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "reauth_confirm"
+    assert result["errors"] == {"base": "invalid_auth"}
+
+    with (
+        patch(
+            "custom_components.joulo.config_flow.JouloApiClient.async_get_chargers",
+            return_value=mock_chargers_response["chargers"],
+        ),
+        patch("custom_components.joulo.async_setup_entry", return_value=True),
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {CONF_API_TOKEN: "new-token"}
+        )
+        await hass.async_block_till_done()
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reauth_successful"
+    assert entry.data[CONF_API_TOKEN] == "new-token"
+    assert entry.unique_id == _token_fingerprint("new-token")

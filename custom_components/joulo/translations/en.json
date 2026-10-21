@@ -14,6 +14,13 @@
         "data": {
           "api_token": "API token"
         }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate Joulo",
+        "description": "The Joulo API rejected the stored API token (it may have been revoked or expired). Enter a new personal API token generated from the Joulo dashboard under Settings → API.",
+        "data": {
+          "api_token": "API token"
+        }
       }
     },
     "error": {
@@ -22,7 +29,8 @@
     },
     "abort": {
       "already_configured": "This Joulo account is already configured.",
-      "reconfigure_successful": "The Joulo API token was updated."
+      "reconfigure_successful": "The Joulo API token was updated.",
+      "reauth_successful": "The Joulo API token was updated."
     }
   },
   "options": {

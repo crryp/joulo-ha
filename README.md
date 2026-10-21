@@ -287,6 +287,11 @@ no need to remove and re-add:
   endpoints (chargers, energy, ERE position, sessions) independently. Changing a value
   reloads the entry immediately with the new intervals.
 
+If the Joulo API rejects the stored token (401/403, e.g. because it was revoked or
+expired), Home Assistant shows a **Reauthentication required** notification under
+Settings → Devices & services. Click it, paste a new personal API token, and the
+entry reloads with the new token — no need to remove and re-add the integration.
+
 ## Installation
 
 ### Via HACS

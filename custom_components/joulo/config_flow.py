@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import hashlib
 import logging
+from collections.abc import Mapping
 from typing import Any
 
 import voluptuous as vol
 from homeassistant.config_entries import (
+    SOURCE_REAUTH,
     SOURCE_RECONFIGURE,
     ConfigEntry,
     ConfigFlow,
@@ -57,11 +59,24 @@ class JouloConfigFlow(ConfigFlow, domain=DOMAIN):
         """Let the user swap in a new personal API token for an existing entry."""
         return await self._async_step_token(user_input)
 
+    async def async_step_reauth(
+        self, entry_data: Mapping[str, Any]
+    ) -> ConfigFlowResult:
+        """Start reauth after the API rejected the stored token (401/403)."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Ask for a new personal API token to replace the rejected one."""
+        return await self._async_step_token(user_input)
+
     async def _async_step_token(
         self, user_input: dict[str, Any] | None
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         reconfiguring = self.source == SOURCE_RECONFIGURE
+        reauthenticating = self.source == SOURCE_REAUTH
 
         if user_input is not None:
             token = user_input[CONF_API_TOKEN].strip()
@@ -78,10 +93,16 @@ class JouloConfigFlow(ConfigFlow, domain=DOMAIN):
                 # The fingerprint is derived from the token text itself (the API
                 # exposes no stable account id), so it changes on every legitimate
                 # token rotation too - it can only be used to dedupe on initial
-                # setup, not to verify "same account" during reconfigure.
+                # setup, not to verify "same account" during reconfigure/reauth.
                 if reconfiguring:
                     return self.async_update_reload_and_abort(
                         self._get_reconfigure_entry(),
+                        unique_id=_token_fingerprint(token),
+                        data={CONF_API_TOKEN: token},
+                    )
+                if reauthenticating:
+                    return self.async_update_reload_and_abort(
+                        self._get_reauth_entry(),
                         unique_id=_token_fingerprint(token),
                         data={CONF_API_TOKEN: token},
                     )
@@ -99,8 +120,15 @@ class JouloConfigFlow(ConfigFlow, domain=DOMAIN):
                     data={CONF_API_TOKEN: token},
                 )
 
+        if reconfiguring:
+            step_id = "reconfigure"
+        elif reauthenticating:
+            step_id = "reauth_confirm"
+        else:
+            step_id = "user"
+
         return self.async_show_form(
-            step_id="reconfigure" if reconfiguring else "user",
+            step_id=step_id,
             data_schema=STEP_USER_DATA_SCHEMA,
             errors=errors,
         )
